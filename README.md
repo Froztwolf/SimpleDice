@@ -12,3 +12,4 @@ Making simple configurable dice that can be rolled using physics, and automatica
 - TODO: Write documentation
 - TODO: Package for Unity Asset store
 
+![image](https://user-images.githubusercontent.com/46853782/123176368-47faf280-d451-11eb-864a-0fcb5e7be524.png)
