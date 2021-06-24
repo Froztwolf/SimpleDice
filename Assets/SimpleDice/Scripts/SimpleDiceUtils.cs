@@ -63,9 +63,8 @@ namespace SimpleDice.Utils
         {
             // Returns a float value within the range specified, either negative or positive
 
-            // Get 0 or 1 randomly. O means negative, 1 means positive
-            int sign = (int)Math.Round((double)UnityEngine.Random.Range(0, 1), 1);
-            if (sign == 0) { sign = -1; }
+            // Get 0 or 1 randomly
+            int sign = UnityEngine.Random.Range(0, 1) <= 0.5 ? -1 : 1;
 
             // Get the value and multiply with the sign
             float randomFloat = UnityEngine.Random.Range(min, max) * sign;

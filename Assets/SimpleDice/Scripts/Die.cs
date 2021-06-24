@@ -11,8 +11,9 @@ namespace SimpleDice
     {
         // Public status variables
         [HideInInspector] public Face faceRolled;
-        public bool showDebugInfo;
-        public bool selected = false;
+        [HideInInspector] public bool selected = false;
+        public bool showRotationGizmos;
+        public bool showStateGizmos;
 
         // All possible faces
         public enum Face { Invalid, One, Two, Three, Four, Five, Six }
@@ -31,12 +32,13 @@ namespace SimpleDice
 
         // Events broadcast by Die
         public event EventHandler<string> DieStopped;
-        public event EventHandler DieStarted;
+        public event EventHandler<string> DieStarted;
 
 
         private Rigidbody _rb;
         private bool _RBStoppedMoving;
         private bool _wasSleepingLastTick = false;
+        private string _dieValue;
 
         // Start is called before the first frame update
         void Start()
@@ -74,10 +76,10 @@ namespace SimpleDice
             // Not actually an event
 
             _RBStoppedMoving = true;
-            string dieValue = ResolveFaceValue(DetectRolledFace());
+            _dieValue = ResolveFaceValue(DetectRolledFace());
 
             // Invoke the event DieStopped if it's not null, and send all subscribers the current value of the die 
-            DieStopped?.Invoke(this, dieValue); 
+            DieStopped?.Invoke(this, _dieValue); 
         }
 
         protected virtual void OnDieRBAwaken()
@@ -86,10 +88,11 @@ namespace SimpleDice
             // Not actually an event
 
             _RBStoppedMoving = false;
-            faceRolled = Face.Invalid;
 
             // Invoke the event DieStarted if it's not null
-            DieStarted?.Invoke(this, new EventArgs());
+            DieStarted?.Invoke(this, _dieValue);
+
+            faceRolled = Face.Invalid;
         }
 
         protected string ResolveFaceValue(Face face)
@@ -116,22 +119,12 @@ namespace SimpleDice
 
         public virtual void SelectDie()
         {
-            if (!selected)
-            {
-                if (showDebugInfo)
-                {
-                    Debug.Log(faceRolled + " at rotation " + transform.rotation.eulerAngles);
-                }
-                selected = true;
-            }
+            selected = true;
         }
 
         public virtual void UnselectDie()
         {
-            if (selected)
-            {
-                selected = false;
-            }
+            selected = false;
         }
 
         protected virtual Face DetectRolledFace()
@@ -198,18 +191,24 @@ namespace SimpleDice
 
         public void RollDie(Vector3 velocity, Vector3 angularVelocity)
         {
+            //If the die was selected before rolling, we now unselect it
+            UnselectDie();
+
             _rb.velocity = velocity;
             _rb.angularVelocity = angularVelocity;
         }
 
         public void RollDie()
         {
+
             // Velocity
             float baseUpVelocity = 5;
             float extraUpVelocityMax = 2;
-            Vector3 velocity = Vector3.up * (baseUpVelocity + UnityEngine.Random.Range(0, extraUpVelocityMax));
+            Vector3 velocity = Vector3.up * (baseUpVelocity + UnityEngine.Random.Range(0, extraUpVelocityMax))
+                + transform.TransformDirection(Vector3.right) * RandomFloatRandomSign(0.1f, 0.2f)
+                + transform.TransformDirection(Vector3.forward) * RandomFloatRandomSign(0.1f, 0.2f);
 
-            // Angular Velocity - By world coordinates
+            // Angular Velocity
 
             // Decide how much the die rotates around each axis proportionately
             Vector3 angularVelocityAxis = 
@@ -227,56 +226,56 @@ namespace SimpleDice
 
         internal void OnDrawGizmos()
         {
-            // Stop showing any debug if user unselected it
-            if (!showDebugInfo)
+            /* Rotation Gizmos */
+            if (showRotationGizmos)
             {
-                return;
-            }
-
-            /* Orientation Gizmos */
-
-            // Red X-Axis
-            Gizmos.color = Color.red;
-            Vector3 xArrow = transform.TransformDirection(Vector3.forward) * 0.2f;
-            Gizmos.DrawRay(transform.position, xArrow);
-
-            // Green Y-Axis
-            Gizmos.color = Color.green;
-            Vector3 yArrow = transform.TransformDirection(Vector3.up) * 0.2f;
-            Gizmos.DrawRay(transform.position, yArrow);
-
-            // Blue Z-Axis
-            Gizmos.color = Color.blue;
-            Vector3 zArrow = transform.TransformDirection(Vector3.right) * 0.2f;
-            Gizmos.DrawRay(transform.position, zArrow);
-
-            /* RB status gizmoz */
-
-            // Yellow wire cube when rigidbody is active
-            if (!_rb.IsSleeping())
-            {
-                Gizmos.color = Color.yellow;
-                Collider col = GetComponent<Collider>();
-
-                Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
-            }
-
-            // Red wire cube when the rigidbody is sleeping, but the rolled face is invalid
-            if (_rb.IsSleeping() && faceRolled == Face.Invalid)
-            {
+                // Red X-Axis
                 Gizmos.color = Color.red;
-                Collider col = GetComponent<Collider>();
+                Vector3 xArrow = transform.TransformDirection(Vector3.forward) * 0.2f;
+                Gizmos.DrawRay(transform.position, xArrow);
 
-                //Gizmos.DrawCube(col.bounds.center, col.bounds.size);
-                Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
+                // Green Y-Axis
+                Gizmos.color = Color.green;
+                Vector3 yArrow = transform.TransformDirection(Vector3.up) * 0.2f;
+                Gizmos.DrawRay(transform.position, yArrow);
+
+                // Blue Z-Axis
+                Gizmos.color = Color.blue;
+                Vector3 zArrow = transform.TransformDirection(Vector3.right) * 0.2f;
+                Gizmos.DrawRay(transform.position, zArrow);
             }
 
-            // Green wire cube when die is selected
-            if (selected)
+
+            /* Status gizmoz */
+
+            if(showStateGizmos)
             {
-                Gizmos.color = Color.green;
-                Collider col = GetComponent<Collider>();
-                Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
+                // Yellow wire cube when rigidbody is active
+                if (!_rb.IsSleeping())
+                {
+                    Gizmos.color = Color.yellow;
+                    Collider col = GetComponent<Collider>();
+
+                    Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
+                }
+
+                // Red wire cube when the rigidbody is sleeping, but the rolled face is invalid
+                if (_rb.IsSleeping() && faceRolled == Face.Invalid)
+                {
+                    Gizmos.color = Color.red;
+                    Collider col = GetComponent<Collider>();
+
+                    //Gizmos.DrawCube(col.bounds.center, col.bounds.size);
+                    Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
+                }
+
+                // Green wire cube when die is selected
+                if (selected == true)
+                {
+                    Gizmos.color = Color.green;
+                    Collider col = GetComponent<Collider>();
+                    Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
+                }
             }
         }
     }

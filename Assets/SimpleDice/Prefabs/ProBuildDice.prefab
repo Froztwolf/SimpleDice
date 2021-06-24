@@ -341,12 +341,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb10fc810d3c1574e98360fe192567bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stopped: 0
-  faceShowing: 0
-  ValueWhenInvalid: 
-  ValueWhenFace1: 6
-  ValueWhenFace2: 4
-  ValueWhenFace3: 5
-  ValueWhenFace4: 2
-  ValueWhenFace5: 3
-  ValueWhenFace6: 1
+  faceRolled: 0
+  selected: 0
+  showRotationGizmos: 0
+  showStateGizmos: 1
+  ValueWhenInvalid: Invalid
+  ValueWhenFace1: 1
+  ValueWhenFace2: 2
+  ValueWhenFace3: 3
+  ValueWhenFace4: 4
+  ValueWhenFace5: 5
+  ValueWhenFace6: 6
