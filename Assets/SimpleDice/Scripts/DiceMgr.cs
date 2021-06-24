@@ -11,8 +11,9 @@ public class DiceMgr : MonoBehaviour
 
     List<Die> diceList = new List<Die>();
     List<string> diceValues = new List<string>();
-    Dictionary<string, int> diceValueTallies = new Dictionary<string, int>();
+    SortedDictionary<string, int> diceValueTallies = new SortedDictionary<string, int>();
 
+    public event EventHandler<SortedDictionary<string, int>> OnAllDiceStopped;
     int stoppedDice = 0;
 
     DiceUI diceUI;
@@ -28,6 +29,7 @@ public class DiceMgr : MonoBehaviour
         if(diceUI)
         {
             RegisterForUIEvents();
+            OnAllDiceStopped += diceUI.OnDiceValuesUpdated;
         }
     }
 
@@ -168,7 +170,7 @@ public class DiceMgr : MonoBehaviour
 
         if(stoppedDice == numberOfDice)
         {
-            OnAllDiceStopped();
+            AllDiceStopped();
         }
     }
 
@@ -224,22 +226,32 @@ public class DiceMgr : MonoBehaviour
     }
 
     // Called by OnDieStopped Event if it was the last die to stop
-    void OnAllDiceStopped()
+    void AllDiceStopped()
     {
-        // Show value of each dice
-        string totalValueString = "The dice came up as: ";
-        foreach(string dieValue in diceValues)
+        //If we have a UI, invoke the event we registered it for in Awake
+        if(diceUI)
         {
-            totalValueString += dieValue + ", ";
+            OnAllDiceStopped?.Invoke(this, diceValueTallies);
         }
-        Debug.Log(totalValueString);
 
-        // Show tally of all dice values
-        string tallyString = "Tally: ";
-        foreach(string value in diceValueTallies.Keys)
+        // Otherwise, print the results out in the console
+        else
         {
-            tallyString += String.Format("\"{0}\"x {1}, ", value, diceValueTallies[value]);
+            // Show value of each dice
+            string totalValueString = "The dice came up as: ";
+            foreach (string dieValue in diceValues)
+            {
+                totalValueString += dieValue + ", ";
+            }
+            Debug.Log(totalValueString);
+
+            // Show tally of all dice values
+            string tallyString = "Tally: ";
+            foreach (string value in diceValueTallies.Keys)
+            {
+                tallyString += String.Format("\"{0}\"x {1}, ", value, diceValueTallies[value]);
+            }
+            Debug.Log(tallyString);
         }
-        Debug.Log(tallyString);
     }
 }
