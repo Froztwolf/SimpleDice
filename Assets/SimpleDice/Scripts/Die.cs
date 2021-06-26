@@ -4,47 +4,68 @@ using static SimpleDice.Utils.SimpleDiceUtils;
 
 namespace SimpleDice
 {
+    public struct Face
+    {
+        public Face(int id, string value, Vector3[] rotations)
+        {
+            faceID = id;
+            faceValue = value;
+
+            // The euler rotation of the die that will result in this face being the one rolled
+            faceRotations = rotations;
+        }
+
+        public int faceID { get;  }
+        public string faceValue { get; }
+        public Vector3[] faceRotations { get; }
+    }
 
     // All dice must have rigidbodies to be usable
     [RequireComponent(typeof(Rigidbody))]
     public class Die : MonoBehaviour
     {
-        // Public status variables
-        [HideInInspector] public Face faceRolled;
-        [HideInInspector] public bool selected = false;
+        private Face[] dieFaces;
+
+        // User Inputs
+        public float allowedSlant = 10f;
         public bool showRotationGizmos;
         public bool showStateGizmos;
+        public static string faceValueWhenInvalid = "Invalid";
 
-        // All possible faces
-        public enum Face { Invalid, One, Two, Three, Four, Five, Six }
-        //TODO: Allow a texture per face
-        //TODO: Should faces be a struct?
-        //TODO: Allow non 6-sided dice
+        // Set up an immutable value for invalid faces, based on user input
+        [HideInInspector] public readonly Face invalidFace = new Face(0, faceValueWhenInvalid, new Vector3[] { });
 
-        //All possible values
-        public string ValueWhenInvalid;
-        public string ValueWhenFace1 = "1";
-        public string ValueWhenFace2 = "2";
-        public string ValueWhenFace3 = "3";
-        public string ValueWhenFace4 = "4";
-        public string ValueWhenFace5 = "5";
-        public string ValueWhenFace6 = "6";
+        [HideInInspector] public bool selected;
 
-        // Events broadcast by Die
-        public event EventHandler<string> DieStopped;
-        public event EventHandler<string> DieStarted;
+        // Let only this class change the rolled face, but anyone access it
+        private Face _faceRolled;
+        [HideInInspector] public Face faceRolled
+        {
+            get { return _faceRolled; }
+        }
 
+        public bool rolledFaceValid
+        {
+            get
+            {
+                return _faceRolled.faceValue != Die.faceValueWhenInvalid;
+            }
+        }
 
         private Rigidbody _rb;
-        private bool _RBStoppedMoving;
-        private bool _wasSleepingLastTick = false;
-        private string _dieValue;
+        private bool _wasRBSleepingLastTick = false;
+
+        // Events broadcast by Die
+        public event EventHandler<Face> DieStopped;
+        public event EventHandler<Face> DieStarted;
+
 
         // Start is called before the first frame update
         void Start()
         {
             // Get the rigidbody, which we've already ensured is there
             _rb = GetComponent<Rigidbody>();
+            DefineDieFaces();
         }
 
         void FixedUpdate()
@@ -52,20 +73,34 @@ namespace SimpleDice
             ManageRBSleep();
         }
 
+        private void DefineDieFaces()
+        {
+            // Define the faces of the die
+            dieFaces = new Face[6]
+            {
+                new Face(1, "1", new Vector3[] { new Vector3(90, 0, 0), new Vector3(90, 0, 90) }),
+                new Face(2, "2", new Vector3[] { new Vector3(0, 0, 270) }),
+                new Face(3, "3", new Vector3[] { new Vector3(0, 0, 180) }),
+                new Face(4, "4", new Vector3[] { new Vector3(0, 0, 0) }),
+                new Face(5, "5", new Vector3[] { new Vector3(0, 0, 90) }),
+                new Face(6, "6", new Vector3[] { new Vector3(270, 0, 0) })
+            };
+        }
+
         private void ManageRBSleep()
         {
             // Makes up for lack of events in Unity when RigidBodies start and stop sleeping
 
             // If this is the first tick after the die's rigidbody started sleeping
-            if (!_wasSleepingLastTick && _rb.IsSleeping())
+            if (!_wasRBSleepingLastTick && _rb.IsSleeping())
             {
-                _wasSleepingLastTick = true;
+                _wasRBSleepingLastTick = true;
                 OnDieRBSleep();
             }
             // If this is the first tick after the rigidbody stopped sleeping
-            else if (_wasSleepingLastTick && !_rb.IsSleeping())
+            else if (_wasRBSleepingLastTick && !_rb.IsSleeping())
             {
-                _wasSleepingLastTick = false;
+                _wasRBSleepingLastTick = false;
                 OnDieRBAwaken();
             }
         }
@@ -75,11 +110,10 @@ namespace SimpleDice
             // First tick after the Rigidbody starts sleeping
             // Not actually an event
 
-            _RBStoppedMoving = true;
-            _dieValue = ResolveFaceValue(DetectRolledFace());
+            _faceRolled = DetectRolledFace();
 
             // Invoke the event DieStopped if it's not null, and send all subscribers the current value of the die 
-            DieStopped?.Invoke(this, _dieValue); 
+            DieStopped?.Invoke(this, _faceRolled); 
         }
 
         protected virtual void OnDieRBAwaken()
@@ -87,34 +121,11 @@ namespace SimpleDice
             // First tick after the Rigidbody stops sleeping
             // Not actually an event
 
-            _RBStoppedMoving = false;
-
             // Invoke the event DieStarted if it's not null
-            DieStarted?.Invoke(this, _dieValue);
+            DieStarted?.Invoke(this, _faceRolled);
 
-            faceRolled = Face.Invalid;
-        }
-
-        protected string ResolveFaceValue(Face face)
-        {
-            // Gets the value of the current face, using the values set in the editor
-            switch (face)
-            {
-                case Face.One:
-                    return ValueWhenFace1;
-                case Face.Two:
-                    return ValueWhenFace2;
-                case Face.Three:
-                    return ValueWhenFace3;
-                case Face.Four:
-                    return ValueWhenFace4;
-                case Face.Five:
-                    return ValueWhenFace5;
-                case Face.Six:
-                    return ValueWhenFace6;
-                default:
-                    return ValueWhenInvalid;
-            }
+            // Set the face value to default
+            _faceRolled = invalidFace;
         }
 
         public virtual void SelectDie()
@@ -130,63 +141,24 @@ namespace SimpleDice
         protected virtual Face DetectRolledFace()
         {
             Vector3 eulers = transform.rotation.eulerAngles;
-            float allowedError = 10f;
 
-            switch (eulers.x)
+            // Check every face
+            foreach(Face face in dieFaces)
             {
-                //Some trickery to make sure we allowe a range of angles, both because physical dice are rarely flat, and because floats are imprecise
-
-                //If the object has not rotated around the x-axis
-                case float n when (AngleWithinError(n, 0, allowedError)):
-                    //Check rotations around the Z-axis
-                    switch (eulers.z)
+                // Compare against each possible rotation of the die that gives this face
+                foreach(Vector3 faceRotation in face.faceRotations)
+                {
+                    // Check rotations about the X and Z axis only. Y-rotation doesn't change the result
+                    // AngleWithinError is a utility function
+                    if(AngleWithinError(eulers.x, faceRotation.x, allowedSlant) && 
+                        AngleWithinError(eulers.z, faceRotation.z, allowedSlant))
                     {
-                        case float m when (AngleWithinError(m, 0, allowedError)): 
-                            faceRolled = Face.Four;
-                            break;
-                        case float m when (AngleWithinError(m, 90, allowedError)): 
-                            faceRolled = Face.Five;
-                            break;
-                        case float m when (AngleWithinError(m, 180, allowedError)): 
-                            faceRolled = Face.Three;
-                            break;
-                        case float m when (AngleWithinError(m, 270, allowedError)):
-                            faceRolled = Face.Two;
-                            break;
+                        return face;
                     }
-                    break;
-
-                //If the object has been rotated 90 degrees around the x-axis
-                case float n when (AngleWithinError(n, 90, allowedError)):
-                    //Rotations around the Z-axis
-                    switch (eulers.z)
-                    {
-                        case float m when (AngleWithinError(m, 0, allowedError)):
-                            faceRolled = Face.One;
-                            break;
-                        case float m when (AngleWithinError(m, 90, allowedError)):
-                            faceRolled = Face.One;
-                            break;
-                    }
-                    break;
-
-                //If the object has been rotated 270 degrees around the x-axis
-                case float n when (AngleWithinError(n, 270, allowedError)):
-                    switch (eulers.z)
-                    {
-                        case float m when (AngleWithinError(m, 0, allowedError)): //
-                            faceRolled = Face.Six;
-                            break;
-                    }
-                    break;
-
-                //If the object has any other rotation
-                default:
-                    faceRolled = Face.Invalid;
-                    break;
+                }
             }
-            return faceRolled;
-
+            // If none of the faces match the current die rotation, it's invalid
+            return invalidFace;
         }
 
         public void RollDie(Vector3 velocity, Vector3 angularVelocity)
@@ -260,7 +232,7 @@ namespace SimpleDice
                 }
 
                 // Red wire cube when the rigidbody is sleeping, but the rolled face is invalid
-                if (_rb.IsSleeping() && faceRolled == Face.Invalid)
+                if (_rb.IsSleeping() && _faceRolled.faceValue == invalidFace.faceValue)
                 {
                     Gizmos.color = Color.red;
                     Collider col = GetComponent<Collider>();

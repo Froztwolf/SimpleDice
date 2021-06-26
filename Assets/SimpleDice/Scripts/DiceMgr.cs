@@ -98,7 +98,7 @@ public class DiceMgr : MonoBehaviour
         {
             foreach (Die die in diceList)
             {
-                if(die.faceRolled == Die.Face.Invalid)
+                if(!die.rolledFaceValid)
                 {
                     die.RollDie();
                 }
@@ -161,8 +161,9 @@ public class DiceMgr : MonoBehaviour
     }
 
     // Event from each Die when it stops moving
-    void OnDieStopped(object sender, string dieValue)
+    void OnDieStopped(object sender, Face dieFace)
     {
+        string dieValue = dieFace.faceValue;
         AddDieValueToCounters(dieValue);
 
         // Update the count of dice that have stopped
@@ -193,8 +194,9 @@ public class DiceMgr : MonoBehaviour
     }
 
     // Event from each Die when it starts moving
-    void OnDieStarted(object sender, string dieValue)
+    void OnDieStarted(object sender, Face dieFace)
     {
+        string dieValue = dieFace.faceValue;
         RemoveDieValueFromCounters(dieValue);
 
         stoppedDice--;
