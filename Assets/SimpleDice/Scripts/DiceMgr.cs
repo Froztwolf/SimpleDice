@@ -13,7 +13,7 @@ public class DiceMgr : MonoBehaviour
     List<string> diceValues = new List<string>();
     SortedDictionary<string, int> diceValueTallies = new SortedDictionary<string, int>();
 
-    public event EventHandler<SortedDictionary<string, int>> OnAllDiceStopped;
+    public event EventHandler<SortedDictionary<string, int>> OnDiceValueUpdate;
     int stoppedDice = 0;
 
     DiceUI diceUI;
@@ -29,7 +29,7 @@ public class DiceMgr : MonoBehaviour
         if(diceUI)
         {
             RegisterForUIEvents();
-            OnAllDiceStopped += diceUI.OnDiceValuesUpdated;
+            OnDiceValueUpdate += diceUI.OnDiceValuesUpdated;
         }
     }
 
@@ -200,6 +200,7 @@ public class DiceMgr : MonoBehaviour
         RemoveDieValueFromCounters(dieValue);
 
         stoppedDice--;
+        OnDiceValueUpdate?.Invoke(this, diceValueTallies);
     }
 
     void RemoveDieValueFromCounters(string dieValue)
@@ -233,7 +234,7 @@ public class DiceMgr : MonoBehaviour
         //If we have a UI, invoke the event we registered it for in Awake
         if(diceUI)
         {
-            OnAllDiceStopped?.Invoke(this, diceValueTallies);
+            OnDiceValueUpdate?.Invoke(this, diceValueTallies);
         }
 
         // Otherwise, print the results out in the console
