@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using SimpleDice;
 using SimpleDice.UI;
+using SimpleDice.Spawner;
 
 public class DiceMgr : MonoBehaviour
 {
     [SerializeField] Die diePrefab;
-    public int numberOfDice = 3;
+    int numberOfDice = 0;
+    public bool SpawnDiceOnStartup = true;
 
     List<Die> diceList = new List<Die>();
     List<string> diceValues = new List<string>();
@@ -22,7 +24,10 @@ public class DiceMgr : MonoBehaviour
     void Start()
     {
         // Create all dice
-        CreateDice();
+        if(SpawnDiceOnStartup)
+        {
+            CreateDice();
+        }
 
         // Register for all relevant events from the UI if a UI Manager is found
         diceUI = FindObjectOfType<DiceUI>();
@@ -35,28 +40,22 @@ public class DiceMgr : MonoBehaviour
 
     void CreateDice()
     {
-        //TODO: Make proper spawners
-        int columns = 9;
-        int rows = 9;
-        float spacing = 0.3f;
+        // Get all the dice spawners
+        List<DiceSpawner> diceSpawners = new List<DiceSpawner>();
+        diceSpawners.AddRange(FindObjectsOfType<DiceSpawner>());
 
-        for (int i = 0; i < numberOfDice; i++)
+        foreach(DiceSpawner spawner in diceSpawners)
         {
-            int column = i % columns;
-            int row = i / columns;
-            float xOffset = (-columns / 2) * spacing + column * spacing;
-            float zOffset = (-rows / 2) * spacing + row * spacing;
-            Vector3 positionOffset = new Vector3(xOffset, 1, zOffset);
-
-            Vector3 spawnPoint = transform.position + positionOffset;
+            Vector3 spawnPoint = spawner.transform.position;
             Die newDie = Instantiate(diePrefab, spawnPoint, UnityEngine.Random.rotation, transform);
 
             diceList.Add(newDie);
 
-            //Register for dice events
+            //Register for the die's events
             newDie.DieStopped += OnDieStopped;
             newDie.DieStarted += OnDieStarted;
         }
+        numberOfDice = diceList.Count;
     }
 
     void RegisterForUIEvents()
