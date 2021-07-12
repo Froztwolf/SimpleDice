@@ -13,9 +13,11 @@ Making simple configurable dice that can be rolled using physics, and automatica
  -- TODO: Allow freezing of XY coordinates
  -- TODO? Spawnerless options?
 - Done: D4 and D6 with proper art pipeline
- -- TODO: Fix normals on symbols layer 
+ -- TODO: Fix normals on symbols layer
+ -- TODO: LoDs
 - TODO: Support a mix of dice types
 - TODO: Collision Audio
+- TODO: Results Logging
 - TODO: Test using the assembly in a different project
 - TODO: Write Unit-Tests
 - TODO: Design showcase scenes and add them to this list
