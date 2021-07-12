@@ -2,18 +2,18 @@
 Making simple configurable dice that can be rolled using physics, and automatically detect which face was rolled give their orientation when they stop.
 - Done: Use arbitrary amounts of D6 and get a tally of values
 - Done: Configurable values per face
- - TODO: Custom Inspector for Dice 
+ -- TODO: Custom Inspector for Dice 
 - Done: Allow re-rolling invalid or selected dice only
- - TODO: Roll invalids more sideways to resist clumping  
+ -- TODO: Roll invalids more sideways to resist clumping  
 - Done: Optional and prefab-based UI with buttons for rolling and text that shows the dice values
- - TODO: Non-gizmo based Invalidity and Selection feedbacks
+ -- TODO: Non-gizmo based Invalidity and Selection feedbacks
 - Done: Create placeable dice-spawner prefabs instead of using the DiceMgr for locating the dice
- - TODO: Spawning FX
- - TODO: Scene-count of expected and current dice 
- - TODO: Allow freezing of XY coordinates
- - TODO? Spawnerless options?
+ -- TODO: Spawning FX
+ -- TODO: Scene-count of expected and current dice 
+ -- TODO: Allow freezing of XY coordinates
+ -- TODO? Spawnerless options?
 - Done: D4 and D6 with proper art pipeline
- - TODO: Fix normals on symbols layer 
+ -- TODO: Fix normals on symbols layer 
 - TODO: Support a mix of dice types
 - TODO: Collision Audio
 - TODO: Test using the assembly in a different project
