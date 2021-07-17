@@ -23,18 +23,18 @@ public class DiceMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Create all dice
-        if(SpawnDiceOnStartup)
-        {
-            CreateDice();
-        }
-
         // Register for all relevant events from the UI if a UI Manager is found
         diceUI = FindObjectOfType<DiceUI>();
         if(diceUI)
         {
             RegisterForUIEvents();
             OnDiceValueUpdate += diceUI.OnDiceValuesUpdated;
+        }
+
+        // Create all dice
+        if (SpawnDiceOnStartup)
+        {
+            CreateDice();
         }
     }
 
@@ -44,18 +44,24 @@ public class DiceMgr : MonoBehaviour
         List<DiceSpawner> diceSpawners = new List<DiceSpawner>();
         diceSpawners.AddRange(FindObjectsOfType<DiceSpawner>());
 
+        // Sign up for OnDieSpawned from all spawners and start the spawning
         foreach(DiceSpawner spawner in diceSpawners)
         {
-            Vector3 spawnPoint = spawner.transform.position;
-            Die newDie = Instantiate(diePrefab, spawnPoint, UnityEngine.Random.rotation, transform);
-
-            diceList.Add(newDie);
-
-            //Register for the die's events
-            newDie.DieStopped += OnDieStopped;
-            newDie.DieStarted += OnDieStarted;
+            // We add the total number of expected dice to numberOfDice right away so we know not to tally up the results until everything is spawned
+            numberOfDice += spawner.totalDiceToSpawn;
+            spawner.OnDieSpawned += OnDieSpawned;
+            spawner.StartSpawning();
         }
-        numberOfDice = diceList.Count;
+    }
+
+    // Event from DiceSpawners
+    void OnDieSpawned(object sender, Die spawnedDie)
+    {
+        diceList.Add(spawnedDie);
+
+        //Register for the die's events
+        spawnedDie.DieStopped += OnDieStopped;
+        spawnedDie.DieStarted += OnDieStarted;
     }
 
     void RegisterForUIEvents()
@@ -199,7 +205,7 @@ public class DiceMgr : MonoBehaviour
         RemoveDieValueFromCounters(dieValue);
 
         stoppedDice--;
-        OnDiceValueUpdate?.Invoke(this, diceValueTallies);
+        // OnDiceValueUpdate?.Invoke(this, diceValueTallies); // Maybe we shouldn't update the UI until all the dice stop moving?
     }
 
     void RemoveDieValueFromCounters(string dieValue)

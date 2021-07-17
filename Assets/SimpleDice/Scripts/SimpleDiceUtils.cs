@@ -59,6 +59,12 @@ namespace SimpleDice.Utils
             return withinBounds;
         }
 
+        public static bool VectorWithinError(Vector3 actualVector, Vector3 targetVector, float allowedError)
+        {
+            float error = Vector3.Angle(actualVector, targetVector);
+            return (error < allowedError);
+        }
+
         public static float RandomFloatRandomSign(float min, float max)
         {
             // Returns a float value within the range specified, either negative or positive

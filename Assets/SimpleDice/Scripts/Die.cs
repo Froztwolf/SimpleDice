@@ -6,39 +6,39 @@ namespace SimpleDice
 {
     public struct Face
     {
-        public Face(int id, string value, Vector3[] rotations)
+        public Face(int id, string value, Vector3 orientation)
         {
             faceID = id;
             faceValue = value;
-
-            // The euler rotation of the die that will result in this face being the one rolled
-            faceRotations = rotations;
+            faceOrientation = orientation;
         }
 
         public int faceID { get;  }
         public string faceValue { get; }
-        public Vector3[] faceRotations { get; }
+        public Vector3 faceOrientation { get; }
     }
 
     // All dice must have rigidbodies to be usable
     [RequireComponent(typeof(Rigidbody))]
-    public class Die : MonoBehaviour
+    public abstract class Die : MonoBehaviour
     {
-        private Face[] dieFaces;
+
+        protected Face[] dieFaces;
 
         // User Inputs
-        public float allowedSlant = 10f;
+        [SerializeField] protected float allowedSlant;
+
         public bool showRotationGizmos;
         public bool showStateGizmos;
         public static string faceValueWhenInvalid = "Invalid";
 
         // Set up an immutable value for invalid faces, based on user input
-        [HideInInspector] public readonly Face invalidFace = new Face(0, faceValueWhenInvalid, new Vector3[] { });
+        [HideInInspector] public readonly Face invalidFace = new Face(0, faceValueWhenInvalid, new Vector3(0, 0, 0));
 
         [HideInInspector] public bool selected;
 
         // Let only this class change the rolled face, but anyone access it
-        private Face _faceRolled;
+        protected Face _faceRolled;
         [HideInInspector] public Face faceRolled
         {
             get { return _faceRolled; }
@@ -52,7 +52,7 @@ namespace SimpleDice
             }
         }
 
-        private Rigidbody _rb;
+        protected Rigidbody _rb;
         private bool _wasRBSleepingLastTick = false;
 
         // Events broadcast by Die
@@ -63,28 +63,11 @@ namespace SimpleDice
         // Start is called before the first frame update
         void Start()
         {
-            // Get the rigidbody, which we've already ensured is there
-            _rb = GetComponent<Rigidbody>();
-            DefineDieFaces();
         }
 
         void FixedUpdate()
         {
             ManageRBSleep();
-        }
-
-        private void DefineDieFaces()
-        {
-            // Define the faces of the die
-            dieFaces = new Face[6]
-            {
-                new Face(1, "1", new Vector3[] { new Vector3(90, 0, 0), new Vector3(90, 0, 90) }),
-                new Face(2, "2", new Vector3[] { new Vector3(0, 0, 270) }),
-                new Face(3, "3", new Vector3[] { new Vector3(0, 0, 180) }),
-                new Face(4, "4", new Vector3[] { new Vector3(0, 0, 0) }),
-                new Face(5, "5", new Vector3[] { new Vector3(0, 0, 90) }),
-                new Face(6, "6", new Vector3[] { new Vector3(270, 0, 0) })
-            };
         }
 
         private void ManageRBSleep()
@@ -105,7 +88,7 @@ namespace SimpleDice
             }
         }
 
-        protected virtual void OnDieRBSleep()
+        protected void OnDieRBSleep()
         {
             // First tick after the Rigidbody starts sleeping
             // Not actually an event
@@ -116,7 +99,7 @@ namespace SimpleDice
             DieStopped?.Invoke(this, _faceRolled); 
         }
 
-        protected virtual void OnDieRBAwaken()
+        protected void OnDieRBAwaken()
         {
             // First tick after the Rigidbody stops sleeping
             // Not actually an event
@@ -130,6 +113,8 @@ namespace SimpleDice
 
         public virtual void SelectDie()
         {
+            //Debug.Log(transform.rotation.eulerAngles);
+            Debug.Log(transform.rotation);
             selected = true;
         }
 
@@ -145,16 +130,11 @@ namespace SimpleDice
             // Check every face
             foreach(Face face in dieFaces)
             {
-                // Compare against each possible rotation of the die that gives this face
-                foreach(Vector3 faceRotation in face.faceRotations)
+                // Check rotations about the X and Z axis only. Y-rotation doesn't change the result
+                // AngleWithinError is a utility function
+                if(VectorWithinError(transform.TransformDirection(face.faceOrientation), Vector3.up, allowedSlant))
                 {
-                    // Check rotations about the X and Z axis only. Y-rotation doesn't change the result
-                    // AngleWithinError is a utility function
-                    if(AngleWithinError(eulers.x, faceRotation.x, allowedSlant) && 
-                        AngleWithinError(eulers.z, faceRotation.z, allowedSlant))
-                    {
-                        return face;
-                    }
+                    return face;
                 }
             }
             // If none of the faces match the current die rotation, it's invalid
@@ -196,27 +176,8 @@ namespace SimpleDice
             RollDie(velocity, angularVelocity);
         }
 
-        internal void OnDrawGizmos()
+        protected void OnDrawGizmos()
         {
-            /* Rotation Gizmos */
-            if (showRotationGizmos)
-            {
-                // Red X-Axis
-                Gizmos.color = Color.red;
-                Vector3 xArrow = transform.TransformDirection(Vector3.forward) * 0.2f;
-                Gizmos.DrawRay(transform.position, xArrow);
-
-                // Green Y-Axis
-                Gizmos.color = Color.green;
-                Vector3 yArrow = transform.TransformDirection(Vector3.up) * 0.2f;
-                Gizmos.DrawRay(transform.position, yArrow);
-
-                // Blue Z-Axis
-                Gizmos.color = Color.blue;
-                Vector3 zArrow = transform.TransformDirection(Vector3.right) * 0.2f;
-                Gizmos.DrawRay(transform.position, zArrow);
-            }
-
 
             /* Status gizmoz */
 
