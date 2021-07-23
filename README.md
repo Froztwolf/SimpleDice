@@ -31,4 +31,4 @@ Making simple configurable dice that can be rolled using physics, and automatica
 Issues to fix:
 - Value update is only sent if there's a UI. Should always be sent if there's any listeners.  
 - 
-![image](https://user-images.githubusercontent.com/46853782/126778814-582e92d1-347b-4060-83de-18eedb1edea1.png)
+![image](https://user-images.githubusercontent.com/46853782/126779019-5d2f39ec-d956-472d-a73e-4a754b0a9bd3.png)
