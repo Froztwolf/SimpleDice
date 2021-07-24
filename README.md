@@ -8,15 +8,14 @@ Making simple configurable dice that can be rolled using physics, and automatica
 - Done: Optional and prefab-based UI with buttons for rolling and text that shows the dice values
  -- TODO: Non-gizmo based Invalidity and Selection feedbacks
 - Done: Create placeable dice-spawner prefabs instead of using the DiceMgr for locating the dice
- -- TODO: Spawning FX
  -- TODO: Scene-count of expected and current dice 
  -- TODO: Allow freezing of XY coordinates
- -- TODO? Spawnerless options?
 - Done: D4 and D6 with proper art pipeline
  -- TODO: Fix normals on symbols layer
  -- TODO: LoDs
 - TODO: Support a mix of dice types
 - TODO: Collision Audio
+- TODO: VFX
 - TODO: Results Logging
 - TODO: Test using the assembly in a different project
 - TODO: Write Unit-Tests
@@ -30,8 +29,6 @@ Making simple configurable dice that can be rolled using physics, and automatica
 - TODO: Package for Unity Asset store
 
 Issues to fix:
-- Original rolled face detection method has serious edge-cases that can't be solved. Must be replaced.
- - Investigating hand-crafted vectors, but 3D models don't seem to fit the mathematics. Needs further investigations
 - Value update is only sent if there's a UI. Should always be sent if there's any listeners.  
 
-![image](https://user-images.githubusercontent.com/46853782/124386994-ec2f3580-dcaa-11eb-8626-88554fb27b4f.png)
+![image](https://user-images.githubusercontent.com/46853782/126779353-1aa70b7a-38f5-4f44-9ad2-a6aa6c61a776.png)
