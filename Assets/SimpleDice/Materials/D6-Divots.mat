@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: D6-Kenney
+  m_Name: D6-Divots
   m_Shader: {fileID: -6465566751694194690, guid: 0d7f8832fc490744eaa4842211163c3d, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - Texture2D_1466DD5:
-        m_Texture: {fileID: 2800000, guid: e8e87db940abad34c8a79eb36f8eaff8, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2acbe3bb915fb284a998017ce32fcffa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_2D047DA4:
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_D713C920:
-        m_Texture: {fileID: 2800000, guid: e8e87db940abad34c8a79eb36f8eaff8, type: 3}
+        m_Texture: {fileID: 2800000, guid: d32ff75204a233442a7fd613cb02b1ff, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_E9CD9EFD:
@@ -96,11 +96,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - Vector1_3B28784: 35.4
-    - Vector1_806FD8DB: 0.376
-    - Vector1_93E4CFE: 70.9
-    - Vector1_CBEE805D: 0
-    - Vector1_EA15685E: 0.382
+    - Vector1_3B28784: 0
+    - Vector1_806FD8DB: 0.229
+    - Vector1_93E4CFE: 0
+    - Vector1_CBEE805D: 0.131
+    - Vector1_EA15685E: 0.213
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -124,7 +124,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Color_7D165C82: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 0}
-    - Color_826FA90D: {r: 1, g: 0.21120514, b: 0, a: 0}
+    - Color_826FA90D: {r: 1, g: 0.60881424, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

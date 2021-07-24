@@ -146,6 +146,7 @@ MonoBehaviour:
   - {fileID: 561115082060049891, guid: 8599a9ab80305aa4c85ff16099654473, type: 3}
   - {fileID: 8487718761298061828, guid: f6cc3f4bcaf5c0b45b08206d91a00628, type: 3}
   - {fileID: 8487718761298061828, guid: 20e17703300a2f64d93b2e2228800a42, type: 3}
+  - {fileID: 1859743091093174066, guid: cd58f68e10787414baeb8d78b2805f5d, type: 3}
   totalDiceToSpawn: 25
   timeBetweenSpawns: 1
   spawnFirstDieImmediately: 1
