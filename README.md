@@ -11,7 +11,6 @@ Making simple configurable dice that can be rolled using physics, and automatica
  -- TODO: Scene-count of expected and current dice 
  -- TODO: Allow freezing of XY coordinates
 - Done: D4 and D6 with proper art pipeline
- -- TODO: Fix normals on symbols layer
  -- TODO: LoDs
 - TODO: Support a mix of dice types
 - TODO: Collision Audio
